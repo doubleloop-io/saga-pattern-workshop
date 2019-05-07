@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaPattern", "SagaPattern\SagaPattern.csproj", "{F3E3AF0E-3F44-47DB-95E6-AAA74B8A3E4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaPattern", "SagaPattern\SagaPattern.csproj", "{F3E3AF0E-3F44-47DB-95E6-AAA74B8A3E4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaPattern.Tests", "SagaPattern.Tests\SagaPattern.Tests.csproj", "{6741B00C-073A-48EF-861A-962A4DB0EA2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F3E3AF0E-3F44-47DB-95E6-AAA74B8A3E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E3AF0E-3F44-47DB-95E6-AAA74B8A3E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3E3AF0E-3F44-47DB-95E6-AAA74B8A3E4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6741B00C-073A-48EF-861A-962A4DB0EA2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6741B00C-073A-48EF-861A-962A4DB0EA2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6741B00C-073A-48EF-861A-962A4DB0EA2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6741B00C-073A-48EF-861A-962A4DB0EA2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
