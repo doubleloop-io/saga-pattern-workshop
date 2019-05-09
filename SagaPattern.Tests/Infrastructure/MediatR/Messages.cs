@@ -16,7 +16,7 @@ namespace SagaPattern.Tests.Infrastructure.MediatR
 
             protected bool Equals(Message other)
             {
-                return String.Equals(value, other.value);
+                return string.Equals(value, other.value);
             }
 
             public override bool Equals(object obj)
@@ -51,7 +51,7 @@ namespace SagaPattern.Tests.Infrastructure.MediatR
 
             protected bool Equals(UnrelatedMessage other)
             {
-                return String.Equals(value, other.value);
+                return string.Equals(value, other.value);
             }
 
             public override bool Equals(object obj)
