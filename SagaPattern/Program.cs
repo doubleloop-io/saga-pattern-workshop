@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using SagaPattern.Domains.Inventory;
 using SagaPattern.Domains.Payment;
 using SagaPattern.Domains.Pricing;
+using SagaPattern.Domains.Selling;
 using SagaPattern.Infrastructure;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
 using static SagaPattern.Domains.Payment.PaymentMessages;
 using static SagaPattern.Domains.Pricing.PricingMessages;
+using static SagaPattern.Domains.Selling.SellingMessages;
 
 namespace SagaPattern
 {
@@ -30,6 +32,7 @@ namespace SagaPattern
             InventoryModule.Bootstrap(InfrastructureModule.Bus);
             PaymentModule.Bootstrap(InfrastructureModule.Bus);
             PricingModule.Bootstrap(InfrastructureModule.Bus);
+            SellingModule.Bootstrap(InfrastructureModule.Bus);
         }
 
         static void CleanStores()
@@ -46,6 +49,7 @@ namespace SagaPattern
             await SeatsAvailabilityCommands();
             await PaymentCommands();
             await PricingCommands();
+            await OrderCommands();
         }
 
         private static async Task SeatsAvailabilityCommands()
@@ -126,7 +130,7 @@ namespace SagaPattern
             {
                 ReferenceId = succeedReferenceId,
                 Amount = 100,
-                BusinessCustomerId = Ids.DoubleLoop,
+                BusinessCustomerId = Ids.StarkIndustries,
                 ConferenceId = Ids.LambdaWorld,
                 PaymentGatewayId = Ids.PayPal
             });
@@ -138,7 +142,7 @@ namespace SagaPattern
             {
                 ReferenceId = rejectReferenceId,
                 Amount = 100,
-                BusinessCustomerId = Ids.DoubleLoop,
+                BusinessCustomerId = Ids.StarkIndustries,
                 ConferenceId = Ids.LambdaWorld,
                 PaymentGatewayId = Ids.Check
             });
@@ -150,7 +154,7 @@ namespace SagaPattern
             {
                 ReferenceId = failingReferenceId,
                 Amount = 100,
-                BusinessCustomerId = Ids.DoubleLoop,
+                BusinessCustomerId = Ids.StarkIndustries,
                 ConferenceId = Ids.LambdaWorld,
                 PaymentGatewayId = Ids.Visa
             });
@@ -172,6 +176,65 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<PriceCalculated>(x => x.ReferenceId == referenceId);
 
+        }
+
+        private static async Task OrderCommands()
+        {
+            var eventWaiter = InfrastructureModule.EventWaiter;
+            var bus = InfrastructureModule.Bus;
+            var orderId = Ids.New();
+
+            await bus.Publish(new PlaceOrder
+            {
+                OrderId = orderId,
+                ConferenceId = Ids.LambdaWorld,
+                Quantity = 10
+            });
+            await eventWaiter.WaitForSingle<OrderPlaced>(x => x.OrderId == orderId);
+
+            await bus.Publish(new BookOrder
+            {
+                OrderId = orderId
+            });
+            await eventWaiter.WaitForSingle<OrderBooked>(x => x.OrderId == orderId);
+
+            await bus.Publish(new PriceOrder
+            {
+                OrderId = orderId,
+                Amount = 100M
+            });
+            await eventWaiter.WaitForSingle<OrderPriced>(x => x.OrderId == orderId);
+
+            await bus.Publish(new SetCustomer
+            {
+                OrderId = orderId,
+                CustomerId = Ids.JonSnow,
+                BusinessCustomerId = Ids.StarkIndustries,
+                PaymentGatewayId = Ids.PayPal,
+            });
+            await eventWaiter.WaitForSingle<CustomerSet>(x => x.OrderId == orderId);
+
+            await bus.Publish(new ConfirmOrder
+            {
+                OrderId = orderId
+            });
+            await eventWaiter.WaitForSingle<OrderConfirmed>(x => x.OrderId == orderId);
+
+            var orderIdToBeCancelled = Ids.New();
+
+            await bus.Publish(new PlaceOrder
+            {
+                OrderId = orderIdToBeCancelled,
+                ConferenceId = Ids.LambdaWorld,
+                Quantity = 10
+            });
+            await eventWaiter.WaitForSingle<OrderPlaced>(x => x.OrderId == orderIdToBeCancelled);
+
+            await bus.Publish(new CancelOrder
+            {
+                OrderId = orderIdToBeCancelled
+            });
+            await eventWaiter.WaitForSingle<OrderCanceled>(x => x.OrderId == orderIdToBeCancelled);
         }
     }
 }
