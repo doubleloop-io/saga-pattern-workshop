@@ -18,6 +18,7 @@ namespace SagaPattern.Infrastructure
 
             Bus = MediatRBus.Create();
             Bus.Subscribe(eventLogger);
+            Bus.Subscribe(new MessageLogger());
             EventWaiter = new EventWaiter(eventLogger);
         }
 

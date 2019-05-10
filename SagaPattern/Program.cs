@@ -57,7 +57,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsAdded>(
                 x => x.SeatsAvailabilityId == availabilityId);
-            Console.WriteLine("Seats added");
 
             await bus.Publish(new RemoveSeats
             {
@@ -66,7 +65,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsRemoved>(
                 x => x.SeatsAvailabilityId == availabilityId);
-            Console.WriteLine("Seats removed");
 
             var reservationIdToBeCommitted = Ids.New();
             await bus.Publish(new MakeSeatsReservation
@@ -77,7 +75,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsReservationAccepted>(
                 x => x.ReservationId == reservationIdToBeCommitted);
-            Console.WriteLine("Seats reserved");
 
             var reservationIdToBeCancelled = Ids.New();
             await bus.Publish(new MakeSeatsReservation
@@ -88,7 +85,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsReservationAccepted>(
                 x => x.ReservationId == reservationIdToBeCancelled);
-            Console.WriteLine("Other seats reserved");
 
             await bus.Publish(new MakeSeatsReservation
             {
@@ -98,7 +94,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsReservationRejected>(
                 x => x.SeatsAvailabilityId == availabilityId);
-            Console.WriteLine("Reservation rejected");
 
             await bus.Publish(new CommitSeatsReservation
             {
@@ -107,7 +102,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsReservationCommitted>(
                 x => x.ReservationId == reservationIdToBeCommitted);
-            Console.WriteLine("Reservation committed");
 
             await bus.Publish(new CancelSeatsReservation
             {
@@ -116,7 +110,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<SeatsReservationCanceled>(
                 x => x.ReservationId == reservationIdToBeCancelled);
-            Console.WriteLine("Reservation cancelled");
         }
 
         private static async Task PaymentCommands()
@@ -135,7 +128,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<PaymentAccepted>(
                 x => x.ReferenceId == succeedReferenceId);
-            Console.WriteLine("Payment succeeded");
 
             var rejectReferenceId = Ids.New();
             await bus.Publish(new MakePayment
@@ -148,7 +140,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<PaymentRejected>(
                 x => x.ReferenceId == rejectReferenceId && x.Reason == "No money.");
-            Console.WriteLine("Payment failed");
 
             var failingReferenceId = Ids.New();
             await bus.Publish(new MakePayment
@@ -161,7 +152,6 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<PaymentRejected>(
                 x => x.ReferenceId == failingReferenceId && x.Reason != "No money.");
-            Console.WriteLine("Payment rejected");
         }
     }
 }
