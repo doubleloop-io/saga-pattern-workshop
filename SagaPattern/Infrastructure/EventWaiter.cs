@@ -8,10 +8,16 @@ namespace SagaPattern.Infrastructure
     public class EventWaiter : IEventWaiter
     {
         private readonly IEventLog eventLog;
+        private static readonly TimeSpan Forever = TimeSpan.MaxValue;
 
         public EventWaiter(IEventLog eventLog)
         {
             this.eventLog = eventLog;
+        }
+
+        public Task<TEvent> WaitForSingle<TEvent>(Func<TEvent, bool> filter) where TEvent : IEvent
+        {
+            return WaitForSingle(filter, Forever);
         }
 
         public async Task<TEvent> WaitForSingle<TEvent>(Func<TEvent, bool> filter, TimeSpan timeout)
