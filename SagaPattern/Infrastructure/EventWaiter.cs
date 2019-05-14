@@ -39,5 +39,10 @@ namespace SagaPattern.Infrastructure
             }
             return default(TEvent);
         }
+
+        public void Reset()
+        {
+            eventLog.Clear();
+        }
     }
 }

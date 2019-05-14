@@ -24,5 +24,13 @@ namespace SagaPattern.Infrastructure
                 return journal.ToArray();
             }
         }
+
+        public void Clear()
+        {
+            lock (lockHandle)
+            {
+                journal.Clear();
+            }
+        }
     }
 }

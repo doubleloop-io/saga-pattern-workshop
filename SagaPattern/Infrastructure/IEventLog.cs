@@ -5,5 +5,7 @@ namespace SagaPattern.Infrastructure
     public interface IEventLog
     {
         IEnumerable<IEvent> LoggedEvents();
+
+        void Clear();
     }
 }

@@ -49,6 +49,7 @@ namespace SagaPattern
         {
             await Exercise2();
             await Exercise3();
+            await Exercise4();
         }
 
         private static async Task Exercise2()
@@ -70,7 +71,8 @@ namespace SagaPattern
             {
                 OrderId = orderId,
                 ConferenceId = Ids.LambdaWorld,
-                Quantity = 2
+                Quantity = 2,
+                ExpireIn = TimeSpan.FromMinutes(15)
             });
             await eventWaiter.WaitForSingle<SeatsReservationAccepted>(
                 x => x.ReservationId == orderId && x.Quantity == 2);
@@ -112,7 +114,8 @@ namespace SagaPattern
             {
                 OrderId = orderId,
                 ConferenceId = Ids.WorkingSoftwareConference,
-                Quantity = 3
+                Quantity = 3,
+                ExpireIn = TimeSpan.FromMinutes(15)
             });
             await eventWaiter.WaitForSingle<OrderPriced>(x => x.OrderId == orderId);
 
@@ -126,6 +129,38 @@ namespace SagaPattern
             await eventWaiter.WaitForSingle<PaymentRejected>(x => x.ReferenceId == orderId);
             await eventWaiter.WaitForSingle<SeatsReservationCanceled>(x => x.ReservationId == orderId);
             await eventWaiter.WaitForSingle<OrderCanceled>(x => x.OrderId == orderId && x.Reason == "No money.");
+
+            Console.WriteLine("Yeah, you did it!!! ;-)");
+        }
+
+        private static async Task Exercise4()
+        {
+            var eventWaiter = InfrastructureModule.EventWaiter;
+            var bus = InfrastructureModule.Bus;
+
+            eventWaiter.Reset();
+
+            await bus.Publish(new AddSeats
+            {
+                SeatsAvailabilityId = Ids.LambdaWorld,
+                Quantity = 10
+            });
+            await eventWaiter.WaitForSingle<SeatsAdded>(
+                x => x.SeatsAvailabilityId == Ids.LambdaWorld);
+
+            var orderId = Ids.New();
+
+            await bus.Publish(new PlaceOrder
+            {
+                OrderId = orderId,
+                ConferenceId = Ids.LambdaWorld,
+                Quantity = 2,
+                ExpireIn = TimeSpan.FromSeconds(5)
+            });
+            await eventWaiter.WaitForSingle<OrderPriced>(x => x.OrderId == orderId);
+
+            await eventWaiter.WaitForSingle<OrderCanceled>(x => x.OrderId == orderId
+                                                                && x.Reason == "Reservation expired.");
 
             Console.WriteLine("Yeah, you did it!!! ;-)");
         }

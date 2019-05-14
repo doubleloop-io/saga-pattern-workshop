@@ -10,5 +10,7 @@ namespace SagaPattern.Infrastructure
 
         Task<TEvent> WaitForSingle<TEvent>(Func<TEvent, bool> filter, TimeSpan timeout)
             where TEvent : IEvent;
+
+        void Reset();
     }
 }
