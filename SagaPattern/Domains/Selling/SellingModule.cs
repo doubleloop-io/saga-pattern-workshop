@@ -17,6 +17,8 @@ namespace SagaPattern.Domains.Selling
             bus.Subscribe<PriceOrder>(orderHandler);
             bus.Subscribe<ConfirmOrder>(orderHandler);
             bus.Subscribe<CancelOrder>(orderHandler);
+
+            bus.Subscribe(new ReserveSeatOnOrderPlacedPolicy(bus));
         }
     }
 }
