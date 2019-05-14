@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SagaPattern.Infrastructure.MediatR
@@ -20,6 +21,20 @@ namespace SagaPattern.Infrastructure.MediatR
         public void Subscribe<T>(IHandler<T> handler) where T : IMessage
         {
             registry.Register(new HandlerWrapper<T>(handler));
+        }
+
+        public Task Publish(IMessage message)
+        {
+            return (Task)TypedPublishMethod(message.GetType())
+                .Invoke(this, new object[] {message});
+        }
+
+        private MethodInfo TypedPublishMethod(Type messageType)
+        {
+            return GetType()
+                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .Single(x => x.Name == nameof(Publish) && x.IsGenericMethodDefinition)
+                .MakeGenericMethod(messageType);
         }
 
         public async Task Publish<T>(T message) where T : IMessage

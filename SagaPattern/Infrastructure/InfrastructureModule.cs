@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SagaPattern.Infrastructure.MediatR;
+using SagaPattern.Infrastructure.Scheduler;
 
 namespace SagaPattern.Infrastructure
 {
@@ -20,6 +21,11 @@ namespace SagaPattern.Infrastructure
             Bus.Subscribe(eventLogger);
             Bus.Subscribe(new MessageLogger());
             EventWaiter = new EventWaiter(eventLogger);
+
+            var scheduler = new ThreadBasedScheduler(new RealTimeProvider());
+            var timeService = new TimerService(scheduler, Bus);
+
+            Bus.Subscribe(timeService);
         }
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)

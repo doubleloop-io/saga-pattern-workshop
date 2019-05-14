@@ -30,6 +30,11 @@ namespace SagaPattern.Tests.Domains.Inventory
         {
         }
 
+        Task IPublisher.Publish(IMessage message)
+        {
+            return Task.CompletedTask;
+        }
+
         Task IPublisher.Publish<T>(T message)
         {
             return Task.CompletedTask;
