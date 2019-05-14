@@ -3,9 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using SagaPattern.Domains.Inventory;
 using SagaPattern.Domains.Payment;
+using SagaPattern.Domains.Pricing;
 using SagaPattern.Infrastructure;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
 using static SagaPattern.Domains.Payment.PaymentMessages;
+using static SagaPattern.Domains.Pricing.PricingMessages;
 
 namespace SagaPattern
 {
@@ -27,6 +29,7 @@ namespace SagaPattern
             InfrastructureModule.Bootstrap();
             InventoryModule.Bootstrap(InfrastructureModule.Bus);
             PaymentModule.Bootstrap(InfrastructureModule.Bus);
+            PricingModule.Bootstrap(InfrastructureModule.Bus);
         }
 
         static void CleanStores()
@@ -42,6 +45,7 @@ namespace SagaPattern
         {
             await SeatsAvailabilityCommands();
             await PaymentCommands();
+            await PricingCommands();
         }
 
         private static async Task SeatsAvailabilityCommands()
@@ -152,6 +156,22 @@ namespace SagaPattern
             });
             await eventWaiter.WaitForSingle<PaymentRejected>(
                 x => x.ReferenceId == failingReferenceId && x.Reason != "No money.");
+        }
+
+        private static async Task PricingCommands()
+        {
+            var eventWaiter = InfrastructureModule.EventWaiter;
+            var bus = InfrastructureModule.Bus;
+
+            var referenceId = Ids.New();
+            await bus.Publish(new CalculatePrice
+            {
+                ReferenceId = referenceId,
+                ConferenceId = Ids.LambdaWorld,
+                Quantity = 10
+            });
+            await eventWaiter.WaitForSingle<PriceCalculated>(x => x.ReferenceId == referenceId);
+
         }
     }
 }
