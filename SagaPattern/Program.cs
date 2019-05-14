@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using SagaPattern.Domains.Inventory;
 using SagaPattern.Domains.Payment;
 using SagaPattern.Domains.Pricing;
+using SagaPattern.Domains.Process;
 using SagaPattern.Domains.Selling;
 using SagaPattern.Infrastructure;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
@@ -32,6 +33,7 @@ namespace SagaPattern
             PaymentModule.Bootstrap(InfrastructureModule.Bus);
             PricingModule.Bootstrap(InfrastructureModule.Bus);
             SellingModule.Bootstrap(InfrastructureModule.Bus);
+            ProcessModule.Bootstrap(InfrastructureModule.Bus);
         }
 
         static void CleanStores()
