@@ -15,7 +15,9 @@ namespace SagaPattern.Domains.Process
         IEventHandler<OrderPriced>,
         IEventHandler<CustomerSet>,
         IEventHandler<PaymentAccepted>,
-        IEventHandler<SeatsReservationCommitted>
+        IEventHandler<SeatsReservationCommitted>,
+        IEventHandler<PaymentRejected>,
+        IEventHandler<SeatsReservationCanceled>
     {
         private readonly IStore<Reservation> store;
         private readonly IPublisher channel;
@@ -133,7 +135,7 @@ namespace SagaPattern.Domains.Process
                 throw new InvalidOperationException($"Reservation {reservation.Id} - cannot customer set");
             }
 
-            reservation.Status = Reservation.ReservationStatus.AwaitingPaymentAccepted;
+            reservation.Status = Reservation.ReservationStatus.AwaitingPaymentCompleted;
             store.Save(reservation);
 
             await channel.Publish(new MakePayment
@@ -151,7 +153,7 @@ namespace SagaPattern.Domains.Process
 
         private async Task Handle(Reservation reservation, PaymentAccepted message)
         {
-            if (reservation.Status != Reservation.ReservationStatus.AwaitingPaymentAccepted)
+            if (reservation.Status != Reservation.ReservationStatus.AwaitingPaymentCompleted)
             {
                 throw new InvalidOperationException($"Reservation {reservation.Id} - cannot manage payment accepted");
             }
@@ -184,6 +186,47 @@ namespace SagaPattern.Domains.Process
                 OrderId = reservation.Id
             });
 
+        }
+
+        public Task Handle(PaymentRejected message) =>
+            ExecuteIfReservationExists(message.ReferenceId, message, Handle);
+
+        private async Task Handle(Reservation reservation, PaymentRejected message)
+        {
+            if (reservation.Status != Reservation.ReservationStatus.AwaitingPaymentCompleted)
+            {
+                throw new InvalidOperationException($"Reservation {reservation.Id} - cannot manage payment rejected");
+            }
+
+            reservation.Status = Reservation.ReservationStatus.AwaitingReservationCancelled;
+            reservation.Reason = message.Reason;
+            store.Save(reservation);
+
+            await channel.Publish(new CancelSeatsReservation
+            {
+                ReservationId = reservation.Id,
+                SeatsAvailabilityId = reservation.ConferenceId
+            });
+        }
+
+        public Task Handle(SeatsReservationCanceled message) =>
+            ExecuteIfReservationExists(message.ReservationId, message, Handle);
+
+        private async Task Handle(Reservation reservation, SeatsReservationCanceled message)
+        {
+            if (reservation.Status != Reservation.ReservationStatus.AwaitingReservationCancelled)
+            {
+                throw new InvalidOperationException($"Reservation {reservation.Id} - cannot manage payment accepted");
+            }
+
+            reservation.Status = Reservation.ReservationStatus.Completed;
+            store.Save(reservation);
+
+            await channel.Publish(new CancelOrder
+            {
+                OrderId = reservation.Id,
+                Reason = reservation.Reason
+            });
         }
 
         private async Task ExecuteIfReservationExists<T>(Guid reservationId, T message, Func<Reservation, T, Task> func)

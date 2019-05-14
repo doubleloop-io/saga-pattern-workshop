@@ -11,8 +11,9 @@ namespace SagaPattern.Domains.Process
             AwaitingPrice,
             AwaitingOrderPriced,
             AwaitingOrderCustomerSet,
-            AwaitingPaymentAccepted,
+            AwaitingPaymentCompleted,
             AwaitingReservationCommitted,
+            AwaitingReservationCancelled,
             Completed
         }
 
@@ -30,5 +31,6 @@ namespace SagaPattern.Domains.Process
         public Guid ConferenceId { get; private set; }
         public int Quantity { get; private set; }
         public decimal Amount { get; set; }
+        public string Reason { get; set; }
     }
 }

@@ -22,6 +22,8 @@ namespace SagaPattern.Domains.Process
             bus.Subscribe<CustomerSet>(reservationSaga);
             bus.Subscribe<PaymentAccepted>(reservationSaga);
             bus.Subscribe<SeatsReservationCommitted>(reservationSaga);
+            bus.Subscribe<PaymentRejected>(reservationSaga);
+            bus.Subscribe<SeatsReservationCanceled>(reservationSaga);
         }
     }
 }
