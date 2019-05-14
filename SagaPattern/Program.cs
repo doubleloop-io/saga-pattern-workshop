@@ -48,6 +48,7 @@ namespace SagaPattern
         private static async Task MainAsync()
         {
             await Exercise2();
+            await Exercise3();
         }
 
         private static async Task Exercise2()
@@ -89,6 +90,42 @@ namespace SagaPattern
                                                                   && x.Amount == 40);
             await eventWaiter.WaitForSingle<SeatsReservationCommitted>(x => x.ReservationId == orderId);
             await eventWaiter.WaitForSingle<OrderConfirmed>(x => x.OrderId == orderId);
+
+            Console.WriteLine("Yeah, you did it!!! ;-)");
+        }
+
+        private static async Task Exercise3()
+        {
+            var eventWaiter = InfrastructureModule.EventWaiter;
+            var bus = InfrastructureModule.Bus;
+
+            await bus.Publish(new AddSeats
+            {
+                SeatsAvailabilityId = Ids.WorkingSoftwareConference,
+                Quantity = 10
+            });
+            await eventWaiter.WaitForSingle<SeatsAdded>(x => x.SeatsAvailabilityId == Ids.WorkingSoftwareConference);
+
+            var orderId = Ids.New();
+
+            await bus.Publish(new PlaceOrder
+            {
+                OrderId = orderId,
+                ConferenceId = Ids.WorkingSoftwareConference,
+                Quantity = 3
+            });
+            await eventWaiter.WaitForSingle<OrderPriced>(x => x.OrderId == orderId);
+
+            await bus.Publish(new SetCustomer
+            {
+                OrderId = orderId,
+                CustomerId = Ids.JonSnow,
+                BusinessCustomerId = Ids.StarkIndustries,
+                PaymentGatewayId = Ids.Check
+            });
+            await eventWaiter.WaitForSingle<PaymentRejected>(x => x.ReferenceId == orderId);
+            await eventWaiter.WaitForSingle<SeatsReservationCanceled>(x => x.ReservationId == orderId);
+            await eventWaiter.WaitForSingle<OrderCanceled>(x => x.OrderId == orderId && x.Reason == "No money.");
 
             Console.WriteLine("Yeah, you did it!!! ;-)");
         }

@@ -5,6 +5,7 @@ namespace SagaPattern
     public static class Ids
     {
         public static readonly Guid LambdaWorld = Guid.Parse("{F364C8F8-15AF-4F5A-9616-AE0931F40FD2}");
+        public static readonly Guid WorkingSoftwareConference = Guid.Parse("{BEF627FC-DF24-46AA-AA3E-32DEEFFAA06E}");
 
         public static readonly Guid PayPal = Guid.Parse("{2CAA0415-1800-4A04-B365-212FCAA8F8EE}");
         public static readonly Guid Check = Guid.Parse("{16E9D044-32DB-46CB-8001-F7CC75E041B7}");
