@@ -36,7 +36,8 @@ namespace SagaPattern.Domains.Selling
             {
                 OrderId = order.Id,
                 ConferenceId = command.ConferenceId,
-                Quantity = command.Quantity
+                Quantity = command.Quantity,
+                ExpireIn = command.ExpireIn
             });
         }
 

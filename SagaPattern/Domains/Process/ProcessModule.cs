@@ -3,6 +3,7 @@ using SagaPattern.Infrastructure.JsonStore;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
 using static SagaPattern.Domains.Payment.PaymentMessages;
 using static SagaPattern.Domains.Pricing.PricingMessages;
+using static SagaPattern.Domains.Process.ProcessMessages;
 using static SagaPattern.Domains.Selling.SellingMessages;
 
 namespace SagaPattern.Domains.Process
@@ -24,6 +25,7 @@ namespace SagaPattern.Domains.Process
             bus.Subscribe<SeatsReservationCommitted>(reservationSaga);
             bus.Subscribe<PaymentRejected>(reservationSaga);
             bus.Subscribe<SeatsReservationCanceled>(reservationSaga);
+            bus.Subscribe<ReservationExpired>(reservationSaga);
         }
     }
 }

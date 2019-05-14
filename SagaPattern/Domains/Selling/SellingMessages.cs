@@ -48,6 +48,7 @@ namespace SagaPattern.Domains.Selling
             public Guid OrderId { get; set; }
             public Guid ConferenceId { get; set; }
             public int Quantity { get; set; }
+            public TimeSpan ExpireIn { get; set; }
         }
 
         public class OrderBooked : EventBase

@@ -4,6 +4,7 @@ using SagaPattern.Infrastructure;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
 using static SagaPattern.Domains.Payment.PaymentMessages;
 using static SagaPattern.Domains.Pricing.PricingMessages;
+using static SagaPattern.Domains.Process.ProcessMessages;
 using static SagaPattern.Domains.Selling.SellingMessages;
 
 namespace SagaPattern.Domains.Process
@@ -17,7 +18,8 @@ namespace SagaPattern.Domains.Process
         IEventHandler<PaymentAccepted>,
         IEventHandler<SeatsReservationCommitted>,
         IEventHandler<PaymentRejected>,
-        IEventHandler<SeatsReservationCanceled>
+        IEventHandler<SeatsReservationCanceled>,
+        IEventHandler<ReservationExpired>
     {
         private readonly IStore<Reservation> store;
         private readonly IPublisher channel;
@@ -45,6 +47,15 @@ namespace SagaPattern.Domains.Process
                 ReservationId = reservation.Id,
                 SeatsAvailabilityId = message.ConferenceId,
                 Quantity = message.Quantity
+            });
+            await channel.Publish(new TimerMessages.Schedule
+            {
+                TriggerAfter = message.ExpireIn,
+                Message = new ReservationExpired
+                {
+                    ReservationId = reservation.Id,
+                    Reason = "Reservation expired."
+                }
             });
         }
 
@@ -226,6 +237,27 @@ namespace SagaPattern.Domains.Process
             {
                 OrderId = reservation.Id,
                 Reason = reservation.Reason
+            });
+        }
+
+        public Task Handle(ReservationExpired message) =>
+            ExecuteIfReservationExists(message.ReservationId, message, Handle);
+
+        private async Task Handle(Reservation reservation, ReservationExpired message)
+        {
+            if (reservation.Status == Reservation.ReservationStatus.Completed)
+            {
+                return;
+            }
+
+            reservation.Status = Reservation.ReservationStatus.AwaitingReservationCancelled;
+            reservation.Reason = message.Reason;
+            store.Save(reservation);
+
+            await channel.Publish(new CancelSeatsReservation
+            {
+                ReservationId = reservation.Id,
+                SeatsAvailabilityId = reservation.ConferenceId
             });
         }
 
