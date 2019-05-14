@@ -9,7 +9,11 @@ namespace SagaPattern.Domains.Process
             AwaitingReservationConfirmed,
             AwaitingOrderBooked,
             AwaitingPrice,
-            AwaitingOrderPriced
+            AwaitingOrderPriced,
+            AwaitingOrderCustomerSet,
+            AwaitingPaymentAccepted,
+            AwaitingReservationCommitted,
+            Completed
         }
 
         public Reservation(Guid id, Guid conferenceId, int quantity)
@@ -25,5 +29,6 @@ namespace SagaPattern.Domains.Process
         public ReservationStatus Status { get; set; }
         public Guid ConferenceId { get; private set; }
         public int Quantity { get; private set; }
+        public decimal Amount { get; set; }
     }
 }

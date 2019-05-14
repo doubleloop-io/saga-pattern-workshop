@@ -1,12 +1,13 @@
 ﻿using SagaPattern.Infrastructure;
 using SagaPattern.Infrastructure.JsonStore;
 using static SagaPattern.Domains.Inventory.InventoryMessages;
+using static SagaPattern.Domains.Payment.PaymentMessages;
 using static SagaPattern.Domains.Pricing.PricingMessages;
 using static SagaPattern.Domains.Selling.SellingMessages;
 
 namespace SagaPattern.Domains.Process
 {
-    public class ProcessModule
+    public static class ProcessModule
     {
         public static void Bootstrap(IBus bus)
         {
@@ -17,6 +18,10 @@ namespace SagaPattern.Domains.Process
             bus.Subscribe<SeatsReservationAccepted>(reservationSaga);
             bus.Subscribe<OrderBooked>(reservationSaga);
             bus.Subscribe<PriceCalculated>(reservationSaga);
+            bus.Subscribe<OrderPriced>(reservationSaga);
+            bus.Subscribe<CustomerSet>(reservationSaga);
+            bus.Subscribe<PaymentAccepted>(reservationSaga);
+            bus.Subscribe<SeatsReservationCommitted>(reservationSaga);
         }
     }
 }
